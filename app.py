@@ -1,11 +1,14 @@
 import argparse
 import flask
-from flask import request, jsonify, abort
+from flask import request, jsonify, abort, render_template
 
 from predict import (predict_fundus_class, classify_fundus_class,
                      multi_predict_fundus_class, multi_classify_fundus_class)
 
-app = flask.Flask(__name__)
+app = flask.Flask(__name__,
+                  template_folder='template_files',
+                  static_folder='static_files')
+
 app.config["DEBUG"] = True
 
 
@@ -16,8 +19,7 @@ def home():
     :return: HTML for basic landing page
     :rtype: str
     """
-    return '''<h1>INSIGHT ML API</h1>
-                <p>A flask api implementation for INSIGHTS internal ML and DL models.   </p>'''
+    return render_template('index.html')
 
 
 @app.route('/echo', methods=['POST'])
