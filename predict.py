@@ -52,8 +52,8 @@ def multi_predict_fundus_class(files: dict):
         processed_imgs = process_fundus_retinals_1(images)
         predictions = model_1.predict(processed_imgs)
         for filename, prediction in zip(filenames, predictions):
-            results[filename] = {'model_1' : str(prediction),
-                                'model_2' : 'NA'}
+            results[filename] = {'model_1': prediction.to_list(),
+                                 'model_2': 'NA'}
 
     except Exception as e:
         print(f'failed to predict model1 : {e}')
@@ -62,7 +62,7 @@ def multi_predict_fundus_class(files: dict):
         iter_processed_imgs = process_fundus_retinals_2(images)
         iter_predictions = model_2.predict(iter_processed_imgs)
         for filename, prediction in zip(filenames, iter_predictions):
-            results[filename]['model_2'] = str(prediction)
+            results[filename]['model_2'] = prediction.to_list()
     except Exception as e:
         print(f'failed to predict model2 : {e}')
 
@@ -70,13 +70,17 @@ def multi_predict_fundus_class(files: dict):
 
 
 def multi_classify_fundus_class(files: dict):
+    results = multi_predict_fundus_class(files)
+
+
+def multi_classify_fundus_class_deprecated(files: dict):
     filenames = [data['filename'] for data in files.values()]
     images = [data['image'] for data in files.values()]
     results = {}
     try:
         processed_imgs = process_fundus_retinals_1(images)
         predictions = model_1.predict(processed_imgs)
-        for filename, prediction in zip(filenames,predictions):
+        for filename, prediction in zip(filenames, predictions):
             try:
                 if float(prediction) < min_class_bound:
                     results[filename] = 0
