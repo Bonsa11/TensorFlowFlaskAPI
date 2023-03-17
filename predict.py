@@ -52,7 +52,7 @@ def multi_predict_fundus_class(files: dict):
         processed_imgs = process_fundus_retinals_1(images)
         predictions = model_1.predict(processed_imgs)
         for filename, prediction in zip(filenames, predictions):
-            results[filename] = {'model_1': prediction.to_list(),
+            results[filename] = {'model_1': prediction.tolist(),
                                  'model_2': 'NA'}
 
     except Exception as e:
@@ -62,7 +62,7 @@ def multi_predict_fundus_class(files: dict):
         iter_processed_imgs = process_fundus_retinals_2(images)
         iter_predictions = model_2.predict(iter_processed_imgs)
         for filename, prediction in zip(filenames, iter_predictions):
-            results[filename]['model_2'] = prediction.to_list()
+            results[filename]['model_2'] = prediction.tolist()
     except Exception as e:
         print(f'failed to predict model2 : {e}')
 
@@ -71,6 +71,23 @@ def multi_predict_fundus_class(files: dict):
 
 def multi_classify_fundus_class(files: dict):
     results = multi_predict_fundus_class(files)
+    for filename in results.keys():
+        if results[filename]["model_1"][0] < min_class_bound:
+            results[filename]["classification"] = 0
+        elif results[filename]["model_1"][0] > max_class_bound:
+            results[filename]["classification"] = 1
+        elif results[filename]["model_2"][0] + results[filename]["model_2"][1] > 1.1:
+            results[filename]["classification"] = -1
+        elif results[filename]["model_2"][0] + results[filename]["model_2"][1] < 0.4:
+            results[filename]["classification"] = -1
+        elif results[filename]["model_2"][0] > 0.996 and results[filename]["model_2"][1] < 0.005:
+            results[filename]["classification"] = 0
+        elif results[filename]["model_2"][1] > 0.93:
+            results[filename]["classification"] = 1
+        else:
+            results[filename]["classification"] = -1
+
+    return results
 
 
 def multi_classify_fundus_class_deprecated(files: dict):
